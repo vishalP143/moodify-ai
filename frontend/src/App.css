@@ -59,27 +59,34 @@ button:hover {
   opacity: 0.9;
 }
 
+/* --- RESULT CARD (Glassmorphism) --- */
 .result-card {
   margin-top: 2rem;
-  /* Lighter background so it stands out from the page */
   background: rgba(255, 255, 255, 0.1); 
-  backdrop-filter: blur(10px); /* The "Frosted Glass" blur */
+  backdrop-filter: blur(10px); 
   padding: 2rem;
   border-radius: 16px;
-  /* This border will use the mood color dynamically */
   border: 2px solid; 
   text-align: center;
   animation: fadeIn 0.5s ease-in;
-  /* A nice shadow to lift it up */
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
-.music-box a {
-  color: #60a5fa;
-  text-decoration: none;
-  font-weight: bold;
+/* --- NEW: VIDEO PLAYER STYLES --- */
+.video-container {
+  margin-top: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); /* Deep shadow for depth */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #000;
 }
 
+iframe {
+  display: block; /* Removes tiny gap at bottom of video */
+}
+
+/* --- HISTORY SECTION --- */
 .history-section {
   margin-top: 3rem;
 }

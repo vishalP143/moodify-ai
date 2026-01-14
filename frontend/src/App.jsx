@@ -63,17 +63,24 @@ function App() {
       {/* The Result Section (Only shows after analysis) */}
       {moodData && (
         <div className="result-card" style={{ borderColor: moodData.color }}>
-          <h2>Mood Detected: <span style={{ color: moodData.color }}>{moodData.mood}</span></h2>
-          <p>AI suggests listening to:</p>
-          <div className="music-box">
-             <a 
-                  href={`https://www.youtube.com/results?search_query=${moodData.musicQuery}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="music-button" // <--- Added class for styling
-                >
-                  ▶️ Listen to {moodData.musicQuery}
-                </a>
+          <h2>
+            Mood Detected: <span style={{ color: moodData.color }}>{moodData.mood}</span>
+          </h2>
+          <p style={{ color: '#cbd5e1', marginBottom: '1rem' }}>
+            AI curated this playlist for you:
+          </p>
+          
+          {/* THE NEW EMBEDDED PLAYER */}
+          <div className="video-container">
+            <iframe 
+              width="100%" 
+              height="350" 
+              src={`https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(moodData.musicQuery)}`} 
+              title="Music Player"
+              frameBorder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
       )}

@@ -5,7 +5,7 @@ const Entry = require('../models/Entry');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Initialize Gemini
-const genAI = new GoogleGenerativeAI("AIzaSyDyQXuSXxnJI6IoPjqjcjSelCF9OcC7qbQ");
+const genAI = new GoogleGenerativeAI("AIzaSyBSadx9n-f4OPiYHepPnwWLflGY-pfKM6k");
 
 // @desc    Create a new entry & analyze mood
 // @route   POST /api/entries
