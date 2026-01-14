@@ -1,51 +1,62 @@
-// backend/routes/entryRoutes.js
 const express = require('express');
 const router = express.Router();
 const Entry = require('../models/Entry');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Initialize Gemini
-const genAI = new GoogleGenerativeAI("AIzaSyBSadx9n-f4OPiYHepPnwWLflGY-pfKM6k");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// @desc    Create a new entry & analyze mood
-// @route   POST /api/entries
+// --- SAFE VIDEO DICTIONARY (Radio Mode) ---
+// These are single LONG videos (1+ hour mixes) that are safe to embed.
+const VIDEO_IDS = {
+  "happy_pop": "ZbZSe6N_BXs",      // Happy Upbeat Pop 1 Hour Mix
+  "sad_piano": "4xDxP51gU_k",      // Sad Piano & Rain (3 Hours)
+  "energetic_gym": "I58Zc2678_4",  // Workout Phonk Mix
+  "calm_lofi": "jfKfPfyJRdk",      // Lofi Girl 24/7 Radio (Reliable)
+  "angry_rock": "P5h4PFBjHq0",     // High Energy Rock Mix
+  "romantic_hindi": "BddP6PYo2gs", // Bollywood Lofi Flip
+  "sad_hindi": "775i7h5Y5uU",      // Arijit Singh Sad Mix
+};
+
 router.post('/', async (req, res) => {
   const { text } = req.body;
-
-  if (!text) {
-    return res.status(400).json({ message: 'Please provide text' });
-  }
+  if (!text) return res.status(400).json({ message: 'Please provide text' });
 
   try {
-    // 1. CALL GEMINI AI
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Use 2.5-flash (Stable)
+
+    // --- AI PROMPT ---
     const prompt = `
       Analyze the sentiment of this journal entry: "${text}".
       
-      You are a culturally aware music curator. 
-      1. DETECT the language of the user's entry (e.g., Hindi, English, Odia, Spanish).
-      2. If the user writes in Hindi/Hinglish, suggest Bollywood/Indie India music. 
-      3. If the user writes in English, suggest international music.
+      You are a DJ. Pick ONE category from this list that best matches the mood:
+      ["happy_pop", "sad_piano", "energetic_gym", "calm_lofi", "angry_rock", "romantic_hindi", "sad_hindi"]
       
-      Return a STRICT JSON object with these 3 fields:
-      - mood: (string, e.g., "Happy", "Melancholic", "Energetic")
-      - color: (string, hex code. MUST be a NEON/BRIGHT color like #00FF00, #FF00FF, #00FFFF, #FFA500 for dark mode.)
-      - musicQuery: (string, a very specific YouTube search query. Include the language or artist name. Example: "Arijit Singh sad songs", "Lofi Hindi beats", "Odia romantic songs", "High energy gym motivation hindi")
+      Rules:
+      - If user writes in Hindi/Hinglish, prefer the "_hindi" options.
+      - Default to "calm_lofi" if unsure.
+      
+      Return a STRICT JSON object:
+      {
+        "mood": "Short mood name",
+        "color": "Neon Hex Code",
+        "category": "The exact category string from the list above"
+      }
     `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    
-    // Clean the text to ensure it's valid JSON (sometimes AI adds ```json markers)
     const cleanText = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
     const analysis = JSON.parse(cleanText);
 
-    // 2. SAVE TO DATABASE
+    // --- MAP CATEGORY TO VIDEO ID ---
+    const videoId = VIDEO_IDS[analysis.category] || VIDEO_IDS["calm_lofi"];
+
     const newEntry = await Entry.create({
       text,
       mood: analysis.mood,
       color: analysis.color,
-      musicQuery: analysis.musicQuery,
+      musicQuery: videoId, // Saving the ID (e.g., "jfKfPfyJRdk")
     });
 
     res.status(201).json(newEntry);
@@ -56,11 +67,9 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   }
 });
 
-// @desc    Get all previous entries
-// @route   GET /api/entries
 router.get('/', async (req, res) => {
   try {
-    const entries = await Entry.find().sort({ createdAt: -1 }); // Newest first
+    const entries = await Entry.find().sort({ createdAt: -1 });
     res.json(entries);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });

@@ -4,8 +4,8 @@ import './App.css';
 
 function App() {
   const [entry, setEntry] = useState('');
-  const [moodData, setMoodData] = useState(null); // Stores the AI result
-  const [history, setHistory] = useState([]);     // Stores past entries
+  const [moodData, setMoodData] = useState(null); 
+  const [history, setHistory] = useState([]);     
   const [loading, setLoading] = useState(false);
 
   // 1. Fetch old entries on load
@@ -22,7 +22,7 @@ function App() {
     }
   };
 
-  // 2. Handle Form Submit (The AI Magic)
+  // 2. Handle Form Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!entry) return;
@@ -31,9 +31,9 @@ function App() {
     try {
       // Send text to backend
       const res = await axios.post('http://localhost:5000/api/entries', { text: entry });
-      setMoodData(res.data);   // Show the result immediately
-      setEntry('');            // Clear the input
-      fetchHistory();          // Refresh the list
+      setMoodData(res.data);   
+      setEntry('');            
+      fetchHistory();          
     } catch (error) {
       console.error("Error analyzing mood:", error);
     }
@@ -60,28 +60,39 @@ function App() {
         </button>
       </div>
 
-      {/* The Result Section (Only shows after analysis) */}
+      {/* Result Section */}
       {moodData && (
         <div className="result-card" style={{ borderColor: moodData.color }}>
           <h2>
             Mood Detected: <span style={{ color: moodData.color }}>{moodData.mood}</span>
           </h2>
           <p style={{ color: '#cbd5e1', marginBottom: '1rem' }}>
-            AI curated this playlist for you:
+            AI curated this mix for you:
           </p>
           
-          {/* THE NEW EMBEDDED PLAYER */}
+          {/* --- VIDEO PLAYER FIXED FOR DIRECT IDS --- */}
           <div className="video-container">
             <iframe 
               width="100%" 
               height="350" 
-              src={`https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(moodData.musicQuery)}`} 
+              // We remove 'listType' and just use the ID directly
+              src={`https://www.youtube.com/embed/${moodData.musicQuery}?autoplay=1`} 
               title="Music Player"
               frameBorder="0" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
               allowFullScreen
             ></iframe>
           </div>
+          
+          {/* Backup Link */}
+          <a 
+             className="backup-link"
+             href={`https://www.youtube.com/watch?v=${moodData.musicQuery}`}
+             target="_blank" 
+             rel="noopener noreferrer"
+          >
+            (Video not playing? Click here to watch on YouTube)
+          </a>
         </div>
       )}
 

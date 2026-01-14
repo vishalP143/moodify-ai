@@ -1,11 +1,13 @@
-const express = require('express');
+// 1. CRITICAL FIX: Load .env variables BEFORE importing anything else
 const dotenv = require('dotenv');
-const cors = require('cors');
-const connectDB = require('./config/db'); // Import the DB logic
-const entryRoutes = require('./routes/entryRoutes');
+dotenv.config(); 
 
-// Load env vars
-dotenv.config();
+const express = require('express');
+const cors = require('cors');
+const connectDB = require('./config/db'); 
+
+// 2. NOW it is safe to import routes (because .env is loaded)
+const entryRoutes = require('./routes/entryRoutes');
 
 // Connect to Database
 connectDB();
@@ -13,7 +15,7 @@ connectDB();
 const app = express();
 
 app.use(cors());
-app.use(express.json()); // Allows us to accept JSON data in the body
+app.use(express.json());
 
 app.use('/api/entries', entryRoutes);
 
